@@ -22,11 +22,6 @@ df.drop(['education'],axis=1,inplace=True)
 df.rename(columns={'male':'Sex_male'},inplace=True)
 df.dropna(axis=0,inplace=True)
 
-st.subheader('Data Information:')
-#Display Dataset
-st.dataframe(df)
-st.write(df.describe())
-chart=st.bar_chart(df)
 
 from statsmodels.tools import add_constant as add_constant
 heart_df_constant = add_constant(df)
@@ -64,16 +59,15 @@ new_features=df[['age','Sex_male','cigsPerDay','totChol','sysBP','BMI','glucose'
 x=new_features.iloc[:,:-1]
 y=new_features.iloc[:,-1]
 from sklearn.model_selection import train_test_split
-x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=.20,random_state=5)
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=.20,random_state=5)
 
 #Model
 from sklearn.linear_model import LogisticRegression
 logreg=LogisticRegression()
 logreg.fit(x_train,y_train)
-y_pred=logreg.predict(x_test)
 
 filename = 'heart.sav'
-pickle.dump(model, open(filename, 'wb'))
+pickle.dump(logreg, open(filename, 'wb'))
 
 
 

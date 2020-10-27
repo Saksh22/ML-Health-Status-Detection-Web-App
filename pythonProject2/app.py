@@ -166,21 +166,21 @@ def main():
                     st.subheader("Predictive Analytics")
 
                     Sex_male = st.selectbox("Gender", (0, 1))
-                    age = st.slider('age', 21, 81, 29)
+                    age = st.slider('age', 21, 81, 39)
                     cigsPerDay = st.slider('cigsPerDay', 0, 50, 0)
-                    totChol = st.slider('Total Cholestrol', 0.0, 846.0, 30.0)
-                    BMI = st.slider('BMI', 0.0, 67.1, 32.0)
-                    sysBP = st.slider('sysBP', 0.0, 67.1, 32.0)
-                    glucose = st.slider('glucose', 0, 500, 70)
+                    totChol = st.slider('Total Cholestrol', 0.0, 846.0, 195.0)
+                    BMI = st.slider('BMI', 0.0, 67.1, 26.97)
+                    sysBP = st.slider('sysBP', 0.0, 67.1, 106.0)
+                    glucose = st.slider('glucose', 0, 500, 77)
 
                     # Store data in dictionary
                     user_data = {'Sex_male': Sex_male,
-                                 'glucose': glucose,
-                                 'cigsPerDay': cigsPerDay,
-                                 'BMI': BMI,
                                  'age': age,
+                                 'cigsPerDay': cigsPerDay,
                                  'totChol': totChol,
-                                 'sysBP': sysBP
+                                 'sysBP': sysBP,
+                                 'BMI': BMI,
+                                 'glucose': glucose
                                  }
                     user_input = pd.DataFrame(user_data, index=[0])
                     st.subheader("User Input")
