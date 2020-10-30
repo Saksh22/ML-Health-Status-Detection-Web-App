@@ -165,23 +165,54 @@ def main():
                 if activity == "Heart":
                     st.subheader("Predictive Analytics")
 
-                    Sex_male = st.selectbox("Gender", (0, 1))
-                    age = st.slider('age', 21, 81, 39)
-                    cigsPerDay = st.slider('cigsPerDay', 0, 50, 0)
-                    totChol = st.slider('Total Cholestrol', 0.0, 846.0, 195.0)
-                    BMI = st.slider('BMI', 0.0, 67.1, 26.97)
-                    sysBP = st.slider('sysBP', 0.0, 67.1, 106.0)
-                    glucose = st.slider('glucose', 0, 500, 77)
+                    sex = st.selectbox("Gender", (0, 1))
+                    age = st.slider('Age', 21, 81, 39)
+                    trestbps = st.slider('Resting blood pressure', 0, 50, 0)
+                    chol = st.slider('Cholestrol', 0.0, 846.0, 195.0)
+                    fbs = st.selectbox('Fasting blood sugar', (0,1))
+                    restecg = st.slider('Resting electrocardiographic results', 0.0, 67.1, 106.0)
+                    thalach = st.slider('Maximum heart rate achieved', 0, 500, 77)
+                    exang = st.selectbox("Exercise induced angina", (0, 1))
+                    oldpeak=st.slider("ST depression induced by exercise relative to rest",0.0,1.4,50.0)
+                    ca=st.selectbox("Number of major vessels ", (0, 1))
+                    cp_0=st.selectbox("Chest pain type 0 ", (0, 1))
+                    cp_1 = st.selectbox("Chest pain type 1 ", (0, 1))
+                    cp_2 = st.selectbox("Chest pain type 2 ", (0, 1))
+                    cp_3 = st.selectbox("Chest pain type 3 ", (0, 1))
+                    thal_0 = st.selectbox(" Defect Type 1 = normal", (0, 1))
+                    thal_1 = st.selectbox(" Defect Type 2 = normal", (0, 1))
+                    thal_2 = st.selectbox(" Defect Type 3 = normal", (0, 1))
+                    thal_3 = st.selectbox(" Defect Type 4 = normal", (0, 1))
+                    slope_0 = st.selectbox("The slope of the peak exercise ST segment 1", (0, 1))
+                    slope_1 = st.selectbox("The slope of the peak exercise ST segment 2", (0, 1))
+                    slope_2 = st.selectbox("The slope of the peak exercise ST segment 3", (0, 1))
+
 
                     # Store data in dictionary
-                    user_data = {'Sex_male': Sex_male,
-                                 'age': age,
-                                 'cigsPerDay': cigsPerDay,
-                                 'totChol': totChol,
-                                 'sysBP': sysBP,
-                                 'BMI': BMI,
-                                 'glucose': glucose
-                                 }
+                    user_data = {
+                        'age': age,
+                        'sex': sex,
+                        'trestbps': trestbps,
+                        'chol': chol,
+                        'fbs': fbs,
+                        'restecg': restecg,
+                        'thalach': thalach,
+                        'exang': exang,
+                        'oldpeak': oldpeak,
+                        'ca': ca,
+                        'cp_0': cp_0,
+                        'cp_1': cp_1,
+                        'cp_2': cp_2,
+                        'cp_3': cp_3,
+                        'thal_0': thal_0,
+                        'thal_1': thal_1,
+                        'thal_2': thal_2,
+                        'thal_3': thal_3,
+                        'slope_0': slope_0,
+                        'slope_1': slope_1,
+                        'slope_2': slope_2
+
+                    }
                     user_input = pd.DataFrame(user_data, index=[0])
                     st.subheader("User Input")
                     st.write(user_input)

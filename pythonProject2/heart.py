@@ -1,73 +1,37 @@
-import pandas as pd
 import numpy as np
-import statsmodels.api as sm
-import scipy.stats as st
-import matplotlib.pyplot as plt
-#import seaborn as sn
-from sklearn.metrics import confusion_matrix
-import matplotlib.mlab as mlab
-# %matplotlib inline
-import streamlit as st
-import joblib
+import pandas as pd
+from sklearn.model_selection import train_test_split
 import pickle
 
 
 
 #Import Data
-df=pd.read_csv('C:/Users/saksh/PycharmProjects/pythonProject2/Heart.csv')
+df=pd.read_csv('D:\Github\ML-Health-Status-Detection-Web-App\pythonProject2\heart1.csv')
 
 
 #Preprocess Data
-df.drop(['education'],axis=1,inplace=True)
-df.rename(columns={'male':'Sex_male'},inplace=True)
-df.dropna(axis=0,inplace=True)
+a = pd.get_dummies(df['cp'], prefix = "cp")
+b = pd.get_dummies(df['thal'], prefix = "thal")
+c = pd.get_dummies(df['slope'], prefix = "slope")
+frames = [df, a, b, c]
+df = pd.concat(frames, axis = 1)
 
+df = df.drop(columns = ['cp', 'thal', 'slope'])
+y = df.target.values
+x_data = df.drop(['target'], axis = 1)
+x = (x_data - np.min(x_data)) / (np.max(x_data) - np.min(x_data)).values
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size = 0.2,random_state=0)
+x_train = x_train.T
+y_train = y_train.T
+x_test = x_test.T
+y_test = y_test.T
 
-from statsmodels.tools import add_constant as add_constant
-heart_df_constant = add_constant(df)
-heart_df_constant.head()
-
-st.chisqprob = lambda chisq, df: st.chi2.sf(chisq, df)
-cols=heart_df_constant.columns[:-1]
-model=sm.Logit(df.TenYearCHD,heart_df_constant[cols])
-result=model.fit()
-
-def back_feature_elem (data_frame,dep_var,col_list):
-    """ Takes in the dataframe, the dependent variable and a list of column names, runs the regression repeatedly eleminating feature with the highest
-    P-value above alpha one at a time and returns the regression summary with all p-values below alpha"""
-
-    while len(col_list)>0 :
-        model=sm.Logit(dep_var,data_frame[col_list])
-        result=model.fit(disp=0)
-        largest_pvalue=round(result.pvalues,3).nlargest(1)
-        if largest_pvalue[0]<(0.05):
-            return result
-            break
-        else:
-            col_list=col_list.drop(largest_pvalue.index)
-
-result=back_feature_elem(heart_df_constant,df.TenYearCHD,cols)
-params = np.exp(result.params)
-conf = np.exp(result.conf_int())
-conf['OR'] = params
-pvalue=round(result.pvalues,3)
-conf['pvalue']=pvalue
-conf.columns = ['CI 95%(2.5%)', 'CI 95%(97.5%)', 'Odds Ratio','pvalue']
-
-import sklearn
-new_features=df[['age','Sex_male','cigsPerDay','totChol','sysBP','BMI','glucose','TenYearCHD']]
-x=new_features.iloc[:,:-1]
-y=new_features.iloc[:,-1]
-from sklearn.model_selection import train_test_split
-x_train,x_test,y_train,y_test = train_test_split(x,y,test_size=.20,random_state=5)
-
-#Model
-from sklearn.linear_model import LogisticRegression
-logreg=LogisticRegression()
-logreg.fit(x_train,y_train)
+from sklearn.ensemble import RandomForestClassifier
+rf = RandomForestClassifier(n_estimators = 1000, random_state = 1)
+rf.fit(x_train.T, y_train.T)
 
 filename = 'heart.sav'
-pickle.dump(logreg, open(filename, 'wb'))
+pickle.dump(rf, open(filename, 'wb'))
 
 
 
