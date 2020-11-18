@@ -2,14 +2,18 @@ import streamlit as st
 
 # EDA Pkgs
 import pandas as pd
+import numpy as np
 import hashlib
-
 import matplotlib
 
 matplotlib.use('Agg')
 import pickle
 from db import *
-
+from PIL import Image
+import keras
+import cv2 
+from matplotlib.image import imread
+import os
 
 
 import sqlite3
@@ -118,6 +122,14 @@ descriptive_message_temp = """
 	</div>
 	"""
 
+STYLE="""
+<style>
+img{
+max-width:100%;
+}
+</style>
+
+"""
 
 @st.cache
 
@@ -137,7 +149,7 @@ def main():
     st.markdown(html_temp.format('royalblue'), unsafe_allow_html=True)
 
     menu = ["Home", "Login", "SignUp"]
-    sub_menu = ["Heart", "Diabetes"]
+    sub_menu = ["Heart", "Diabetes","Pneumonia","Diabetic Retinopathy"]
 
     choice = st.sidebar.selectbox("Menu", menu)
     if choice == "Home":
@@ -163,50 +175,37 @@ def main():
 
                     sex = st.selectbox("Gender", (0, 1))
                     age = st.slider('Age', 21, 81, 39)
-                    trestbps = st.slider('Resting blood pressure', 0, 50, 0)
-                    chol = st.slider('Cholestrol', 0.0, 846.0, 195.0)
-                    fbs = st.selectbox('Fasting blood sugar', (0,1))
-                    restecg = st.slider('Resting electrocardiographic results', 0.0, 67.1, 106.0)
-                    thalach = st.slider('Maximum heart rate achieved', 0, 500, 77)
-                    exang = st.selectbox("Exercise induced angina", (0, 1))
-                    oldpeak=st.slider("ST depression induced by exercise relative to rest",0.0,1.4,50.0)
-                    ca=st.selectbox("Number of major vessels ", (0, 1))
-                    cp_0=st.selectbox("Chest pain type 0 ", (0, 1))
-                    cp_1 = st.selectbox("Chest pain type 1 ", (0, 1))
-                    cp_2 = st.selectbox("Chest pain type 2 ", (0, 1))
-                    cp_3 = st.selectbox("Chest pain type 3 ", (0, 1))
-                    thal_0 = st.selectbox(" Defect Type 1 = normal", (0, 1))
-                    thal_1 = st.selectbox(" Defect Type 2 = normal", (0, 1))
-                    thal_2 = st.selectbox(" Defect Type 3 = normal", (0, 1))
-                    thal_3 = st.selectbox(" Defect Type 4 = normal", (0, 1))
-                    slope_0 = st.selectbox("The slope of the peak exercise ST segment 1", (0, 1))
-                    slope_1 = st.selectbox("The slope of the peak exercise ST segment 2", (0, 1))
-                    slope_2 = st.selectbox("The slope of the peak exercise ST segment 3", (0, 1))
+                    currentSmoker = st.selectbox("Do you consume cigarettes?", (0, 1))
+                    cigsPerDay=st.slider('How many Cigerattes do you consume per day?', 0, 50, 3)
+                    diabetes = st.selectbox("Do you have diabetes?", (0, 1))
+                    BPMeds=st.selectbox("Are you on BP Medicines?", (0, 1))
+                    prevalentStroke = st.selectbox("Have you experienced a stroke?", (0, 1))
+                    prevalentHyp = st.selectbox("Have you experienced Hypertension?", (0, 1))
+                    totChol = st.slider('Cholestrol', 0.0, 846.0, 195.0)
+                    sysBP = st.slider('Systolic Blood Pressure', 0.0, 67.1, 106.0)
+                    diaBP = st.slider('Diabolic Blood Pressure', 0, 500, 77)
+                    BMI=st.slider("Body Mass Index(BMI)",0.0,23.41,50.0)
+                    heartrate= st.slider("Heart Rate", 50, 150, 80)
+                    glucose = st.slider("Glucose", 0, 150, 50)
+
 
 
                     # Store data in dictionary
                     user_data = {
+                        'male': sex,
                         'age': age,
-                        'sex': sex,
-                        'trestbps': trestbps,
-                        'chol': chol,
-                        'fbs': fbs,
-                        'restecg': restecg,
-                        'thalach': thalach,
-                        'exang': exang,
-                        'oldpeak': oldpeak,
-                        'ca': ca,
-                        'cp_0': cp_0,
-                        'cp_1': cp_1,
-                        'cp_2': cp_2,
-                        'cp_3': cp_3,
-                        'thal_0': thal_0,
-                        'thal_1': thal_1,
-                        'thal_2': thal_2,
-                        'thal_3': thal_3,
-                        'slope_0': slope_0,
-                        'slope_1': slope_1,
-                        'slope_2': slope_2
+                        'currentSmoker': currentSmoker,
+                        'cigsPerDay': cigsPerDay,
+                        'BPMeds': BPMeds,
+                        'prevalentStroke': prevalentStroke,
+                        'prevalentHyp': prevalentHyp,
+                        'diabetes': diabetes,
+                        'totChol': totChol,
+                        'sysBP': sysBP,
+                        'diaBP': diaBP,
+                        'BMI': BMI,
+                        'heartRate': heartrate,
+                        'glucose': glucose
 
                     }
                     user_input = pd.DataFrame(user_data, index=[0])
@@ -225,7 +224,7 @@ def main():
 
                         if prediction == 1:
                             st.warning("Heart Disease Detected")
-                            pred_probability_score = {"Die": pred_prob[0][0] * 100, "Live": pred_prob[0][1] * 100}
+                            pred_probability_score = {"Heart Disease present": pred_prob[0][0] * 100, "Heart Disease not present": pred_prob[0][1] * 100}
                             st.subheader("Prediction Probability Score")
                             st.json(pred_probability_score)
                             st.subheader("Prescriptive Analytics")
@@ -233,7 +232,7 @@ def main():
 
                         else:
                             st.success("Everything looks fine")
-                            pred_probability_score = {"Die": pred_prob[0][0] * 100, "Live": pred_prob[0][1] * 100}
+                            pred_probability_score = {"Heart Disease present": pred_prob[0][0] * 100, "Heart Disease not present": pred_prob[0][1] * 100}
                             st.subheader("Prediction Probability Score")
                             st.json(pred_probability_score)
 
@@ -275,7 +274,7 @@ def main():
 
                         if prediction == 1:
                             st.warning("Patient Has Diabetes")
-                            pred_probability_score = {"Die": pred_prob[0][0] * 100, "Live": pred_prob[0][1] * 100}
+                            pred_probability_score = {"Diabetic": pred_prob[0][0] * 100, "Non-Diabetic": pred_prob[0][1] * 100}
                             st.subheader("Prediction Probability Score")
                             st.json(pred_probability_score)
                             st.subheader("Prescriptive Analytics")
@@ -283,9 +282,104 @@ def main():
 
                         else:
                             st.success("Everything looks fine")
-                            pred_probability_score = {"Die": pred_prob[0][0] * 100, "Live": pred_prob[0][1] * 100}
+                            pred_probability_score = {"Diabetic": pred_prob[0][0] * 100, "Non-Diabetic": pred_prob[0][1] * 100}
                             st.subheader("Prediction Probability Score")
                             st.json(pred_probability_score)
+
+                if activity=="Pneumonia":
+                    st.subheader("Predictive Analytics...")
+                    uploaded_file=st.file_uploader("Upload Your File",type="jpeg")
+                    if uploaded_file is not None:
+                        image=Image.open(uploaded_file)
+                        st.image(image, caption='Uploaded Image.', use_column_width=True)
+                        st.write("")
+
+                        test_data = []
+                        testimg = image.resize((150,150), Image.NEAREST)
+                        testimg = np.dstack([testimg, testimg, testimg])
+                        testimg = testimg.astype('float32') / 255
+                        test_data.append(testimg)
+                        user_input= np.array(test_data)
+
+                        if st.button("Predict"):
+                            model = keras.models.load_model('lungs1.pkl')
+                            prediction = model.predict(user_input)
+                            prediction=np.round(prediction)
+                            # Display Predictions
+                            st.subheader('Result')
+                            st.write(prediction)
+                            pred_prob = model.predict_proba(user_input)
+                            if prediction == 1:
+                                st.warning("Patient Has Pneumonia")
+                                # pred_probability_score = {"Diabetic": pred_prob[0][0] * 100, "Non-Diabetic": pred_prob[0][1] * 100}
+                                # st.subheader("Prediction Probability Score")
+                                # st.json(pred_probability_score)
+                                st.subheader("Prescriptive Analytics")
+                                st.markdown(prescriptive_message_temp, unsafe_allow_html=True)
+
+                            else:
+                                st.success("Everything looks fine")
+                                pred_probability_score = {"Diabetic": pred_prob[0][0] * 100, "Non-Diabetic": pred_prob[0][1] * 100}
+                                st.subheader("Prediction Probability Score")
+                                st.json(pred_probability_score)
+
+
+
+
+                if activity=="Diabetic Retinopathy":
+                    st.subheader("Predictive Analytics...")
+                    def file_selector(folder_path=r'.\test'):
+                        filenames = os.listdir(folder_path)
+                        selected_filename = st.selectbox('Select a file', filenames)
+                        return os.path.join(folder_path, selected_filename)
+
+                    filename = file_selector()
+                    st.write('You selected `%s`' % filename)
+                    image=Image.open(filename)
+                    st.image(image, caption='Uploaded Image.', use_column_width=True)      
+                    # if uploaded_file is not None:
+                    #     image=Image.open(uploaded_file)
+                    #     st.image(image, caption='Uploaded Image.', use_column_width=True)
+                    #     st.write("")
+
+                        
+
+                        # img = random.choice(os.listdir("test/DR/"))
+                        
+                        # im = uploaded_file.name
+                        # im = imread(uploaded_file)
+                        # # im = im.resize((224,224))
+                        # # im = np.array(im)
+                        # im = im.reshape([1,224,224,3])
+
+                    input_shape = [1,224,224,3]
+                    im = imread(filename)
+                    im = im.reshape(input_shape)
+                                            
+
+                    if st.button("Predict"):
+                        model = keras.models.load_model('DR.sav')
+                        prediction = model.predict(im)
+                        prediction=np.round(prediction[0][0])
+                        # Display Predictions
+                        st.subheader('Result')
+                        st.write(prediction)
+                        pred_prob = model.predict_proba(im)
+                        if prediction == 1:
+                                st.warning("Patient Has Diabetes")
+                                pred_probability_score = {"Diabetic": pred_prob[0][0] * 100, "Non-Diabetic": pred_prob[0][1] * 100}
+                                st.subheader("Prediction Probability Score")
+                                st.json(pred_probability_score)
+                                st.subheader("Prescriptive Analytics")
+                                st.markdown(prescriptive_message_temp, unsafe_allow_html=True)
+
+                        else:
+                            st.success("Everything looks fine")
+                            pred_probability_score = {"Diabetic": pred_prob[0][0] * 100, "Non-Diabetic": pred_prob[0][1] * 100}
+                            st.subheader("Prediction Probability Score")
+                            st.json(pred_probability_score)
+
+
 
 
             else:

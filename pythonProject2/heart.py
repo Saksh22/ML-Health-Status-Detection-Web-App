@@ -1,37 +1,41 @@
 import numpy as np
 import pandas as pd
+from sklearn.utils import resample
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 import pickle
 
 
 
 #Import Data
-df=pd.read_csv('D:\Github\ML-Health-Status-Detection-Web-App\pythonProject2\heart1.csv')
+df=pd.read_csv('D:\Github\ML-Health-Status-Detection-Web-App\pythonProject2\Heart.csv')
 
+#Dropping irrelevent columns and missing values
+df.drop(['education'],axis=1,inplace=True)
+df.dropna(axis=0,inplace=True)
 
-#Preprocess Data
-a = pd.get_dummies(df['cp'], prefix = "cp")
-b = pd.get_dummies(df['thal'], prefix = "thal")
-c = pd.get_dummies(df['slope'], prefix = "slope")
-frames = [df, a, b, c]
-df = pd.concat(frames, axis = 1)
+# Resampling- Upsampling
+minority = df[df.TenYearCHD==1]
+majority = df[df.TenYearCHD==0]
+minority_upsample = resample(minority, replace=True, n_samples=majority.shape[0])
+df = pd.concat([minority_upsample, majority], axis=0)
 
-df = df.drop(columns = ['cp', 'thal', 'slope'])
-y = df.target.values
-x_data = df.drop(['target'], axis = 1)
-x = (x_data - np.min(x_data)) / (np.max(x_data) - np.min(x_data)).values
-x_train, x_test, y_train, y_test = train_test_split(x,y,test_size = 0.2,random_state=0)
-x_train = x_train.T
-y_train = y_train.T
-x_test = x_test.T
-y_test = y_test.T
+# Splitting the data
+from sklearn.model_selection import train_test_split
+X =  df.drop('TenYearCHD', axis=1)
+Y =  df['TenYearCHD']
+X_train, X_test, y_train, y_test =train_test_split(X,Y,
+                                                   test_size=0.25,
+                                                   random_state=0,
+                                                   stratify=Y)
+#Model
+from xgboost import XGBClassifier
 
-from sklearn.ensemble import RandomForestClassifier
-rf = RandomForestClassifier(n_estimators = 1000, random_state = 1)
-rf.fit(x_train.T, y_train.T)
+model = XGBClassifier(random_state=123)
+model.fit(X_train, y_train)
 
 filename = 'heart.sav'
-pickle.dump(rf, open(filename, 'wb'))
+pickle.dump(model, open(filename, 'wb'))
 
 
 

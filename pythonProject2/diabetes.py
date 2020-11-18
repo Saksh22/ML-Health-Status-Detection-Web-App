@@ -36,11 +36,10 @@ Y=df[df_name[8]]
 #Split data into train and test data
 X_train,X_test,Y_train,Y_test=train_test_split(X,Y,test_size=0.25,random_state=0,stratify=Y)
 
+from xgboost import XGBClassifier
 
-
-model = ExtraTreesClassifier(random_state=123)
+model = XGBClassifier(random_state=123)
 model.fit(X_train, Y_train)
-
 
 filename = 'diabetes.sav'
 pickle.dump(model, open(filename, 'wb'))
