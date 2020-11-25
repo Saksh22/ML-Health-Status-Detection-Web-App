@@ -135,12 +135,7 @@ max-width:100%;
 
 
 
-def change_avatar(sex):
-    if sex == "male":
-        avatar_img = 'img_avatar.png'
-    else:
-        avatar_img = 'img_avatar2.png'
-    return avatar_img
+
 
 
 def main():
@@ -149,7 +144,7 @@ def main():
     st.markdown(html_temp.format('royalblue'), unsafe_allow_html=True)
 
     menu = ["Home", "Login", "SignUp"]
-    sub_menu = ["Heart", "Diabetes","Pneumonia","Diabetic Retinopathy"]
+    sub_menu = ["Liver", "Diabetes","Pneumonia","Diabetic Retinopathy"]
 
     choice = st.sidebar.selectbox("Menu", menu)
     if choice == "Home":
@@ -170,50 +165,69 @@ def main():
 
                 activity = st.selectbox("Checkup", sub_menu)
 
-                if activity == "Heart":
+                if activity == "Liver":
                     st.subheader("Predictive Analytics")
 
-                    sex = st.selectbox("Gender", (0, 1))
                     age = st.slider('Age', 21, 81, 39)
-                    currentSmoker = st.selectbox("Do you consume cigarettes?", (0, 1))
-                    cigsPerDay=st.slider('How many Cigerattes do you consume per day?', 0, 50, 3)
-                    diabetes = st.selectbox("Do you have diabetes?", (0, 1))
-                    BPMeds=st.selectbox("Are you on BP Medicines?", (0, 1))
-                    prevalentStroke = st.selectbox("Have you experienced a stroke?", (0, 1))
-                    prevalentHyp = st.selectbox("Have you experienced Hypertension?", (0, 1))
-                    totChol = st.slider('Cholestrol', 0.0, 846.0, 195.0)
-                    sysBP = st.slider('Systolic Blood Pressure', 0.0, 67.1, 106.0)
-                    diaBP = st.slider('Diabolic Blood Pressure', 0, 500, 77)
+                    gender = st.selectbox("Gender", (0, 1))
+                    weight=st.slider('Weight', 0, 100, 45)
+                    height=st.slider('Height', 0.0, 200.0, 150.0)
                     BMI=st.slider("Body Mass Index(BMI)",0.0,23.41,50.0)
-                    heartrate= st.slider("Heart Rate", 50, 150, 80)
-                    glucose = st.slider("Glucose", 0, 150, 50)
-
-
+                    obesity=st.selectbox("Obesity", (0, 1))
+                    waist=st.slider('Waist', 0.0, 200.0, 150.0)
+                    maxBP=st.slider('Maximum Blood Pressure', 0.0, 300.0, 150.0)
+                    minBP=st.slider('Minimum Blood Pressure', 0.0, 100.0, 50.0)
+                    goodChol=st.slider('Good Cholesterol', 0.0, 100.0, 50.0)
+                    badChol=st.slider('Bad Cholesterol', 0.0, 100.0, 50.0)
+                    totChol = st.slider('Total Cholestrol', 0.0, 300.0, 195.0)
+                    dyslipidemia=st.selectbox("Dyslipidemia", (0, 1))
+                    pvd=st.selectbox("PVD", (0, 1))
+                    physicalActivity=st.slider('Physical Activities?', 0, 5, 3)
+                    poorvision=st.selectbox(" Do you have Poor Vision?", (0, 1))
+                    alcohol=st.selectbox("Do you consume Alcohol ?", (0, 1))
+                    hypertension=st.selectbox("Do you experience Hypertension?", (0, 1))
+                    familyHypertension= st.selectbox("Is there a history of hypertension in your family?", (0, 1))
+                    diabetes = st.selectbox("Do you have diabetes?", (0, 1))
+                    familyDiabetes= st.selectbox("Is there a diabetes history in your family?", (0, 1))
+                    hepatitis = st.selectbox("Do you have Hepatitis?", (0, 1))
+                    familyHepatitis = st.selectbox("Is there a hepatitis history in your family?", (0, 1))
+                    chronicFatigue=st.selectbox("Do you experience Chronic Fatigue?", (0, 1))
 
                     # Store data in dictionary
                     user_data = {
-                        'male': sex,
-                        'age': age,
-                        'currentSmoker': currentSmoker,
-                        'cigsPerDay': cigsPerDay,
-                        'BPMeds': BPMeds,
-                        'prevalentStroke': prevalentStroke,
-                        'prevalentHyp': prevalentHyp,
-                        'diabetes': diabetes,
-                        'totChol': totChol,
-                        'sysBP': sysBP,
-                        'diaBP': diaBP,
-                        'BMI': BMI,
-                        'heartRate': heartrate,
-                        'glucose': glucose
-
+                        'Gender': gender,
+                        'Age': age,
+                        'Weight': weight,
+                        'Height': height,
+                        'BodyMassIndex': BMI,
+                        'Obesity': obesity,
+                        'Waist': waist,
+                        'MaximumBloodPressure': maxBP,
+                        'MinimumBloodPressure':minBP,
+                        'GoodCholesterol':goodChol,
+                        'BadCholesterol': badChol,
+                        'TotalCholesterol': totChol,
+                        'Dyslipidemia':dyslipidemia,
+                        'PVD':pvd,
+                        'PhysicalActivity':physicalActivity,
+                        'PoorVision':poorvision,
+                        'AlcoholConsumption':alcohol,
+                        'HyperTension':hypertension,
+                        'FamilyHyperTension':familyHypertension,
+                        'Diabetes':diabetes,
+                        'FamilyDiabetes':familyDiabetes,
+                        'Hepatitis':hepatitis,
+                        'FamilyHepatitis':familyHepatitis,
+                        'ChronicFatigue':chronicFatigue,
                     }
+
+
                     user_input = pd.DataFrame(user_data, index=[0])
                     st.subheader("User Input")
                     st.write(user_input)
 
                     if st.button("Predict"):
-                        model=load_model('heart.sav')
+                        model=load_model('liver.sav')
                         prediction = model.predict(user_input)
                         # Display Predictions
                         st.subheader('Result')
@@ -223,8 +237,8 @@ def main():
 
 
                         if prediction == 1:
-                            st.warning("Heart Disease Detected")
-                            pred_probability_score = {"Heart Disease present": pred_prob[0][0] * 100, "Heart Disease not present": pred_prob[0][1] * 100}
+                            st.warning("Liver Disease Detected")
+                            pred_probability_score = {"Liver Disease present": pred_prob[0][0] * 100, "Liver Disease not present": pred_prob[0][1] * 100}
                             st.subheader("Prediction Probability Score")
                             st.json(pred_probability_score)
                             st.subheader("Prescriptive Analytics")
@@ -232,7 +246,7 @@ def main():
 
                         else:
                             st.success("Everything looks fine")
-                            pred_probability_score = {"Heart Disease present": pred_prob[0][0] * 100, "Heart Disease not present": pred_prob[0][1] * 100}
+                            pred_probability_score = {"Liver Disease present": pred_prob[0][0] * 100, "Liver Disease not present": pred_prob[0][1] * 100}
                             st.subheader("Prediction Probability Score")
                             st.json(pred_probability_score)
 
@@ -263,7 +277,7 @@ def main():
                     st.write(user_input)
 
                     if st.button("Predict"):
-                        model = load_model('diabetes.sav')
+                        model = load_model('DiabetesModel.sav')
                         prediction = model.predict(user_input)
                         # Display Predictions
                         st.subheader('Result')
